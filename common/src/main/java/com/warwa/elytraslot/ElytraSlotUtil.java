@@ -10,7 +10,7 @@ import java.lang.reflect.Proxy;
 import java.util.function.Predicate;
 
 public class ElytraSlotUtil {
-    public static final String TRINKETS_ELYTRA_SLOT_ID = "chest/elytra";
+    public static final String TRINKETS_ELYTRA_SLOT_ID = "elytraslot/elytra";
     public static final Identifier TRINKETS_ELYTRA_ONLY_PREDICATE_ID = Identifier.fromNamespaceAndPath("elytraslot", "elytra_only");
 
     private static final int MAX_TRINKETS_SLOT_SCAN = 32;
@@ -89,7 +89,7 @@ public class ElytraSlotUtil {
 
     /**
      * Returns true when Trinkets Updated is installed and the dedicated
-     * {@code chest/elytra} slot from this mod's data files is available to the player.
+     * {@code elytraslot/elytra} slot from this mod's data files is available to the player.
      */
     public static boolean usesTrinketsSlot(Player player) {
         if (player == null) return false;
