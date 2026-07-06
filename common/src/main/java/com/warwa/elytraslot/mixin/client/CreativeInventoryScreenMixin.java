@@ -2,7 +2,6 @@ package com.warwa.elytraslot.mixin.client;
 
 import com.warwa.elytraslot.ElytraSlotConstants;
 import com.warwa.elytraslot.ElytraSlotContainer;
-import com.warwa.elytraslot.ElytraSlotUtil;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
@@ -19,9 +18,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Places and draws the standalone Elytra Slot in the creative inventory only when
- * that standalone slot exists. If Trinkets Updated provides the dedicated elytra
- * slot, the Trinkets UI owns the slot instead.
+ * Places and draws the standalone Elytra Slot in the creative inventory.
  */
 @Mixin(CreativeModeInventoryScreen.class)
 public abstract class CreativeInventoryScreenMixin
@@ -60,8 +57,6 @@ public abstract class CreativeInventoryScreenMixin
             }
         }
         if (ourSlot == null) {
-            if (ElytraSlotUtil.usesTrinketsSlot(player)) return;
-
             ElytraSlotConstants.LOGGER.warn(
                 "[elytraslot] selectTab(INVENTORY): no ElytraSlotContainer found in player.inventoryMenu — skipping"
             );
