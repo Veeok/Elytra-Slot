@@ -4,15 +4,15 @@
   "amount": 1,
   "max_stack_size": 1,
   "validator_predicates": [
-    "trinkets:default"
+    "elytraslot:elytra_only"
   ],
   "quick_move_predicates": [
-    "trinkets:default"
+    "elytraslot:elytra_only"
   ],
   "tooltip_predicates": [
-    "trinkets:default"
+    "elytraslot:elytra_only"
   ],
   "interact_equipable_predicates": [
-    "trinkets:default"
+    "elytraslot:elytra_only"
   ]
 }
