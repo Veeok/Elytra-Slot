@@ -23,8 +23,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Intercepts {@link Equippable#swapWithEquipmentSlot(ItemStack, Player)} to route
- * elytras into the standalone Elytra Slot when Trinkets Updated is not providing
- * the dedicated Trinkets elytra slot.
+ * elytras into Elytra Slot's standalone slot when vanilla chest and external Trinkets
+ * elytra slots are not already occupied.
  */
 @Mixin(value = Equippable.class, priority = 500)
 public abstract class ElytraEquipMixin {
@@ -46,9 +46,6 @@ public abstract class ElytraEquipMixin {
         }
 
         if (ElytraSlotUtil.isElytraLike(player.getItemBySlot(EquipmentSlot.CHEST))) {
-            return;
-        }
-        if (ElytraSlotUtil.usesTrinketsSlot(player)) {
             return;
         }
         if (ElytraSlotUtil.hasExternalElytra(player)) {
