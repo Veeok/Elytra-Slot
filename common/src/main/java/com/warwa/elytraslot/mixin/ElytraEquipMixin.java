@@ -23,22 +23,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Intercepts {@link Equippable#swapWithEquipmentSlot(ItemStack, Player)} to route
- * elytras into the custom slot with full vanilla parity:
- * <ul>
- *   <li>Only intercepts when the in-hand stack's {@code Equippable.slot()} is {@code CHEST}
- *       (B1 fix — non-CHEST-slotted gliders fall through to vanilla).</li>
- *   <li>Only intercepts when the real chest slot does NOT already have an elytra-like
- *       item (otherwise vanilla's chest↔hand swap runs normally).</li>
- *   <li>Mirrors vanilla's outer gate: {@code canUseSlot(CHEST) && canBeEquippedBy(typeHolder)}
- *       → {@code PASS} otherwise.</li>
- *   <li>Mirrors vanilla's inner gate: {@code PREVENT_ARMOR_CHANGE + !creative} or
- *       {@code isSameItemSameComponents} → {@code FAIL}.</li>
- *   <li>Fires the same {@code awardStat(ITEM_USED)} server-side.</li>
- *   <li>Fires the equip sound + {@link net.minecraft.world.level.gameevent.GameEvent#EQUIP}
- *       via {@link ElytraEquipEffects#onSlotChanged}.</li>
- *   <li>Returns {@code InteractionResult.SUCCESS.heldItemTransformedTo(...)} in the
- *       correct single-count vs stacked branch, matching vanilla's return value.</li>
- * </ul>
+ * elytras into the standalone Elytra Slot when Trinkets Updated is not providing
+ * the dedicated Trinkets elytra slot.
  */
 @Mixin(value = Equippable.class, priority = 500)
 public abstract class ElytraEquipMixin {
@@ -49,14 +35,9 @@ public abstract class ElytraEquipMixin {
     private void onSwapWithEquipmentSlot(ItemStack inHand, Player player, CallbackInfoReturnable<InteractionResult> cir) {
         if (!ElytraSlotUtil.isElytraLike(inHand)) return;
 
-        // B1 fix: only route CHEST-slotted gliders. Modded / non-CHEST gliders fall through
-        // so vanilla handles them in their native slot.
         Equippable inHandEquippable = inHand.get(DataComponents.EQUIPPABLE);
         if (inHandEquippable == null || inHandEquippable.slot() != EquipmentSlot.CHEST) return;
 
-        // G2 fix: honor Equippable.swappable() flag. Vanilla's `Item.use` checks this
-        // before calling swapWithEquipmentSlot, but a mod could bypass Item.use and
-        // call the swap directly. Defensive check.
         if (!inHandEquippable.swappable()) {
             ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] ElytraEquipMixin.onSwap gate-trip swappable=false stack={}", inHand
@@ -64,16 +45,16 @@ public abstract class ElytraEquipMixin {
             return;
         }
 
-        // If the vanilla chest slot already has an elytra, do not redirect — let vanilla
-        // swap the chest-elytra with the in-hand elytra exactly as vanilla does.
         if (ElytraSlotUtil.isElytraLike(player.getItemBySlot(EquipmentSlot.CHEST))) {
+            return;
+        }
+        if (ElytraSlotUtil.usesTrinketsSlot(player)) {
             return;
         }
         if (ElytraSlotUtil.hasExternalElytra(player)) {
             return;
         }
 
-        // Mirror vanilla outer gate: canUseSlot + canBeEquippedBy. If either fails, PASS.
         if (!player.canUseSlot(EquipmentSlot.CHEST)
             || !this.canBeEquippedBy(player.typeHolder())) {
             cir.setReturnValue(InteractionResult.PASS);
@@ -83,9 +64,6 @@ public abstract class ElytraEquipMixin {
         IElytraSlotPlayer slotPlayer = (IElytraSlotPlayer) player;
         ItemStack inEquipmentSlot = slotPlayer.elytraslot_getElytraStack();
 
-        // Mirror vanilla inner gate:
-        //   PREVENT_ARMOR_CHANGE enchantment blocks non-creative swap
-        //   identical item+components: no swap
         if (EnchantmentHelper.has(inEquipmentSlot, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)
             && !player.isCreative()) {
             cir.setReturnValue(InteractionResult.FAIL);
@@ -105,8 +83,6 @@ public abstract class ElytraEquipMixin {
             player.awardStat(Stats.ITEM_USED.get(inHand.getItem()));
         }
 
-        // Snapshot the previous stack BEFORE mutation so ElytraEquipEffects sees the
-        // correct old/new pair.
         ItemStack oldForEffects = inEquipmentSlot.copy();
 
         InteractionResult result;
