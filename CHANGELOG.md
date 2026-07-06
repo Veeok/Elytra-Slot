@@ -4,6 +4,49 @@ All dates in local time. Format: chronological, most recent on top.
 
 ---
 
+## 2026-07-07 — v2.0.0 PR update: Trinkets priority integration
+
+Compatibility update for Trinkets Updated. Trinkets remains optional. Elytra Slot still works normally without Trinkets installed.
+
+### Added
+
+- **Optional Trinkets Updated integration** through reflection. Elytra Slot checks for Trinkets API classes at runtime instead of making Trinkets a required dependency.
+- **Dedicated Trinkets elytra slot** at `chest/elytra` when Trinkets Updated is installed.
+- **Trinkets slot data files**:
+  - `data/trinkets/entities/elytraslot.json` assigns `chest/elytra` to players.
+  - `data/trinkets/slots/chest/elytra.json` defines the dedicated elytra slot with one item capacity and the Elytra Slot empty-slot icon.
+  - `data/trinkets/tags/item/chest/elytra.json` allows `minecraft:elytra` in the dedicated slot.
+- **Migration path** from the old standalone Elytra Slot container into Trinkets `chest/elytra` when possible.
+- **Fabric metadata suggestion** for `trinkets_updated` in `fabric.mod.json` without making it a hard dependency.
+
+### Changed
+
+- Trinkets now has priority when the dedicated `chest/elytra` slot is available.
+- Elytra Slot hides its standalone inventory slot when Trinkets provides the dedicated elytra slot.
+- Right-click equip now falls through to Trinkets when the dedicated Trinkets slot is active.
+- Shift-click routing now quietly falls through to vanilla or Trinkets when the standalone slot is hidden.
+- Inventory and creative inventory UI drawing now only shows the standalone Elytra Slot panel when the standalone slot actually exists.
+- Most noisy runtime logs were demoted from `INFO` to `DEBUG`, including equip, sync, save/load, quick-move, creative slot, and glide damage logs.
+
+### Fixed
+
+- Elytra Slot no longer tries to use, render, or damage its standalone slot while Trinkets already has an elytra-like item equipped.
+- Inserting into the standalone Elytra Slot is blocked when an external Trinkets elytra is already equipped.
+- If a stored standalone-slot elytra cannot be migrated to Trinkets because the Trinkets slot is missing or occupied, the standalone slot stays visible as a fallback so the item is not trapped.
+- Fixed a broken Javadoc link that prevented the build from passing.
+
+### Verification
+
+- Earlier local check: `./gradlew.bat :fabric:build` passed after the first compatibility/logging update.
+- A fresh build and gameplay test are still required after the dedicated Trinkets slot changes.
+- Test matrix needed:
+  - Fabric client + server without Trinkets.
+  - Fabric client + server with Trinkets Updated installed.
+  - Existing world/player with an elytra already stored in Elytra Slot before installing Trinkets.
+  - Trinkets `chest/elytra` already occupied before migration.
+
+---
+
 ## 2026-04-19 — v2.0.0 (full parity pass)
 
 Comprehensive pass through every deviation in `VANILLA_PARITY_AUDIT.md`. All items now either FIXED or deliberately deferred as documented carve-outs (F1 non-Player scope, D7 cosmetic drop order, C1 deep Curios/Trinkets interop).
