@@ -1,14 +1,17 @@
 package com.warwa.elytraslot;
 
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.function.Predicate;
 
 public class ElytraSlotUtil {
     public static final String TRINKETS_ELYTRA_SLOT_ID = "chest/elytra";
+    public static final Identifier TRINKETS_ELYTRA_ONLY_PREDICATE_ID = Identifier.fromNamespaceAndPath("elytraslot", "elytra_only");
 
     private static final int MAX_TRINKETS_SLOT_SCAN = 32;
 
@@ -20,6 +23,7 @@ public class ElytraSlotUtil {
     private static final Method TRINKET_SLOT_ACCESS_IS_VALID = findTrinketSlotAccessIsValid();
 
     private static boolean warnedTrinketsQueryFailure = false;
+    private static boolean trinketsElytraOnlyPredicateRegistered = false;
 
     public static boolean isElytraLike(ItemStack stack) {
         if (stack.isEmpty()) return false;
@@ -28,6 +32,59 @@ public class ElytraSlotUtil {
 
     public static boolean isTrinketsAvailable() {
         return TRINKETS_GET_ATTACHMENT != null;
+    }
+
+    /**
+     * Registers the predicate used by the dedicated Trinkets slot data file.
+     *
+     * <p>This keeps Trinkets optional: the implementation talks to Trinkets via
+     * reflection and a dynamic proxy instead of compiling against Trinkets API types.
+     * The predicate only accepts elytra-like items, using Minecraft's GLIDER data
+     * component so vanilla elytras and compatible modded elytras can equip, while
+     * unrelated Trinkets items cannot use the dedicated elytra slot.
+     */
+    public static void registerTrinketsElytraOnlyPredicate() {
+        if (trinketsElytraOnlyPredicateRegistered || !isTrinketsAvailable()) return;
+
+        try {
+            Class<?> api = Class.forName("eu.pb4.trinkets.api.TrinketsApi");
+            Class<?> predicateType = Class.forName("eu.pb4.trinkets.api.TrinketsApi$TrinketPredicate");
+            Method register = api.getMethod("registerTrinketPredicate", Identifier.class, predicateType);
+
+            Object predicate = Proxy.newProxyInstance(
+                predicateType.getClassLoader(),
+                new Class<?>[] { predicateType },
+                (proxy, method, args) -> {
+                    if (method.getDeclaringClass() == Object.class) {
+                        return switch (method.getName()) {
+                            case "toString" -> "ElytraSlotTrinketsElytraOnlyPredicate";
+                            case "hashCode" -> System.identityHashCode(proxy);
+                            case "equals" -> proxy == args[0];
+                            default -> null;
+                        };
+                    }
+
+                    if ("test".equals(method.getName()) && args != null && args.length >= 1 && args[0] instanceof ItemStack stack) {
+                        return isElytraLike(stack);
+                    }
+
+                    if (method.getReturnType() == boolean.class) return false;
+                    return null;
+                }
+            );
+
+            register.invoke(null, TRINKETS_ELYTRA_ONLY_PREDICATE_ID, predicate);
+            trinketsElytraOnlyPredicateRegistered = true;
+            ElytraSlotConstants.LOGGER.info(
+                "[elytraslot] Registered Trinkets predicate {} for dedicated elytra slot",
+                TRINKETS_ELYTRA_ONLY_PREDICATE_ID
+            );
+        } catch (ReflectiveOperationException | LinkageError | RuntimeException ex) {
+            ElytraSlotConstants.LOGGER.warn(
+                "[elytraslot] Trinkets API found, but failed to register the elytra-only Trinkets predicate. The dedicated Trinkets slot will reject inserts until this is fixed.",
+                ex
+            );
+        }
     }
 
     /**
