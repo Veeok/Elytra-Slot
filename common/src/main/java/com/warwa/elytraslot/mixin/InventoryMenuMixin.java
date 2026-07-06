@@ -18,9 +18,16 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Adds our custom elytra slot to the player's {@link InventoryMenu}. The slot is
- * appended to the end of the menu's slot list — its index is therefore
- * {@code menu.slots.size() - 1} at the time it's added (46 in vanilla).
+ * Adds our standalone elytra slot to the player's {@link InventoryMenu} when
+ * Trinkets Updated is not providing the dedicated {@code chest/elytra} slot.
+ * The standalone slot is appended to the end of the menu's slot list — its
+ * index is therefore {@code menu.slots.size() - 1} at the time it's added.
+ *
+ * <p>When Trinkets Updated is installed and the dedicated Trinkets slot exists,
+ * Trinkets is preferred and this standalone slot is not added. Any item already
+ * stored in the standalone slot is moved into the dedicated Trinkets slot when
+ * possible. If migration cannot happen, the standalone slot remains visible as
+ * a safe fallback so the item is never trapped.
  *
  * <p>Overrides:
  * <ul>
@@ -30,9 +37,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  *       Binding), matching vanilla {@code ArmorSlot.mayPickup} (UI2 fix).</li>
  *   <li>{@link Slot#getNoItemIcon} — points at our empty-slot elytra sprite.</li>
  * </ul>
- *
- * <p>The slot's index in the menu is exposed as
- * {@link com.warwa.elytraslot.ElytraSlotConstants#ELYTRA_SLOT_INDEX} (46).
  */
 @Mixin(InventoryMenu.class)
 public abstract class InventoryMenuMixin {
@@ -41,6 +45,34 @@ public abstract class InventoryMenuMixin {
     private void elytraslot$addElytraSlot(Inventory inventory, boolean active, Player player, CallbackInfo ci) {
         InventoryMenu menu = (InventoryMenu) (Object) this;
         var container = ((IElytraSlotPlayer) player).elytraslot_getElytraContainer();
+
+        if (ElytraSlotUtil.usesTrinketsSlot(player)) {
+            ItemStack storedStandaloneElytra = container.getItem(0);
+            if (storedStandaloneElytra.isEmpty()) {
+                ElytraSlotConstants.LOGGER.debug(
+                    "[elytraslot] Trinkets dedicated elytra slot available; standalone slot hidden player={}",
+                    player.getName().getString()
+                );
+                return;
+            }
+
+            if (ElytraSlotUtil.tryMoveCustomElytraToTrinkets(player, storedStandaloneElytra)) {
+                container.setItemSilent(0, ItemStack.EMPTY);
+                ElytraSlotConstants.LOGGER.debug(
+                    "[elytraslot] migrated standalone elytra into Trinkets slot={} player={}",
+                    ElytraSlotUtil.TRINKETS_ELYTRA_SLOT_ID,
+                    player.getName().getString()
+                );
+                return;
+            }
+
+            ElytraSlotConstants.LOGGER.warn(
+                "[elytraslot] Trinkets dedicated elytra slot is available, but the stored standalone elytra could not be migrated. Keeping standalone slot visible as a fallback. player={} stack={}",
+                player.getName().getString(),
+                storedStandaloneElytra
+            );
+        }
+
         int insertedAtIndex = menu.slots.size(); // this is the index this addSlot will land at
         menu.addSlot(new Slot(container, 0, -25, 8) {
             @Override
