@@ -26,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  *       using the MC 26.1 {@code ValueOutput}/{@code ValueInput} API with key
  *       {@code "elytraslot_item"}. Load uses the silent container setter.</li>
  *   <li>Death drop — mirrors vanilla {@code Player.dropEquipment}: respects the
- *       {@link GameRules#RULE_KEEPINVENTORY} gamerule, and honors
+ *       {@code keepInventory} gamerule, and honors
  *       {@link EnchantmentEffectComponents#PREVENT_EQUIPMENT_DROP} (Curse of Vanishing)
  *       by destroying the stack instead of dropping it.</li>
  * </ul>
@@ -48,7 +48,7 @@ public class PlayerElytraStorageMixin implements IElytraSlotPlayer {
         ItemStack stack = this.elytraslot_container.getItem(0);
         if (!stack.isEmpty()) {
             output.store("elytraslot_item", ItemStack.CODEC, stack);
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] saveData wrote stack={}", stack
             );
         }
@@ -60,7 +60,7 @@ public class PlayerElytraStorageMixin implements IElytraSlotPlayer {
             // Silent — we don't want an equip sound when the player logs in and their
             // saved elytra stack is restored from disk.
             this.elytraslot_container.setItemSilent(0, stack);
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] loadData restored stack={}", stack
             );
         });
@@ -74,7 +74,7 @@ public class PlayerElytraStorageMixin implements IElytraSlotPlayer {
 
         // D1 fix: mirror vanilla Player.dropEquipment — do nothing if keepInventory is on.
         if (level.getGameRules().get(GameRules.KEEP_INVENTORY)) {
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] dropOnDeath skipped (keepInventory) player={} stack={}",
                 player.getName().getString(), stack
             );
@@ -85,7 +85,7 @@ public class PlayerElytraStorageMixin implements IElytraSlotPlayer {
         // Player.destroyVanishingCursedItems destroys cursed items rather than dropping
         // them. Do the same for the custom slot.
         if (EnchantmentHelper.has(stack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] dropOnDeath destroyed (vanishing curse) player={} stack={}",
                 player.getName().getString(), stack
             );
@@ -93,7 +93,7 @@ public class PlayerElytraStorageMixin implements IElytraSlotPlayer {
             return;
         }
 
-        ElytraSlotConstants.LOGGER.info(
+        ElytraSlotConstants.LOGGER.debug(
             "[elytraslot] dropOnDeath dropping player={} stack={}",
             player.getName().getString(), stack
         );

@@ -36,6 +36,8 @@ public class HumanoidRenderStateMixin {
 
         holder.elytraslot_setAccessoriesElytra(ItemStack.EMPTY);
 
+        if (ElytraSlotUtil.hasExternalElytra(player)) return;
+
         ItemStack elytra = ((IElytraSlotPlayer) player).elytraslot_getElytraStack();
         if (ElytraSlotUtil.isElytraLike(elytra)) {
             holder.elytraslot_setAccessoriesElytra(elytra.copy());

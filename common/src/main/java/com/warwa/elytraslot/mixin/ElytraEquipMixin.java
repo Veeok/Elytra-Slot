@@ -58,7 +58,7 @@ public abstract class ElytraEquipMixin {
         // before calling swapWithEquipmentSlot, but a mod could bypass Item.use and
         // call the swap directly. Defensive check.
         if (!inHandEquippable.swappable()) {
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] ElytraEquipMixin.onSwap gate-trip swappable=false stack={}", inHand
             );
             return;
@@ -67,6 +67,9 @@ public abstract class ElytraEquipMixin {
         // If the vanilla chest slot already has an elytra, do not redirect — let vanilla
         // swap the chest-elytra with the in-hand elytra exactly as vanilla does.
         if (ElytraSlotUtil.isElytraLike(player.getItemBySlot(EquipmentSlot.CHEST))) {
+            return;
+        }
+        if (ElytraSlotUtil.hasExternalElytra(player)) {
             return;
         }
 
@@ -93,7 +96,7 @@ public abstract class ElytraEquipMixin {
             return;
         }
 
-        ElytraSlotConstants.LOGGER.info(
+        ElytraSlotConstants.LOGGER.debug(
             "[elytraslot] swapWithEquipmentSlot inHand={} existing={} count={} creative={}",
             inHand, inEquipmentSlot, inHand.getCount(), player.isCreative()
         );

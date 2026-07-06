@@ -29,13 +29,13 @@ public final class ElytraSlotNetworkFabric {
     private ElytraSlotNetworkFabric() {}
 
     public static void register() {
-        ElytraSlotConstants.LOGGER.info("[elytraslot] Fabric network init BEGIN");
+        ElytraSlotConstants.LOGGER.debug("[elytraslot] Fabric network init BEGIN");
 
         PayloadTypeRegistry.clientboundPlay().register(
             ElytraSlotSyncPayload.TYPE,
             ElytraSlotSyncPayload.STREAM_CODEC
         );
-        ElytraSlotConstants.LOGGER.info("[elytraslot] Fabric clientboundPlay payload type registered: {}",
+        ElytraSlotConstants.LOGGER.debug("[elytraslot] Fabric clientboundPlay payload type registered: {}",
             ElytraSlotSyncPayload.TYPE.id());
 
         ElytraSyncDispatcher.register((Player player, ItemStack newStack) -> {
@@ -54,12 +54,12 @@ public final class ElytraSlotNetworkFabric {
                 ServerPlayNetworking.send(self, payload);
                 sent++;
             }
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] FabricDispatcher.broadcastSlotChange player={} stack={} sent={}",
                 player.getName().getString(), newStack, sent
             );
         });
 
-        ElytraSlotConstants.LOGGER.info("[elytraslot] Fabric network init END");
+        ElytraSlotConstants.LOGGER.debug("[elytraslot] Fabric network init END");
     }
 }

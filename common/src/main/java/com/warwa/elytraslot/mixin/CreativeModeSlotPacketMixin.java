@@ -96,7 +96,7 @@ public abstract class CreativeModeSlotPacketMixin {
         this.player.inventoryMenu.setRemoteSlot(slotNum, stack);
         this.player.inventoryMenu.broadcastChanges();
 
-        ElytraSlotConstants.LOGGER.info(
+        ElytraSlotConstants.LOGGER.debug(
             "[elytraslot] handleSetCreativeModeSlot stored stack={} into slot={} player={}",
             stack, slotNum, this.player.getName().getString()
         );

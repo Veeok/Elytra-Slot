@@ -27,7 +27,7 @@ public interface ElytraSyncDispatcher {
     /** Called once per loader at mod init. */
     static void register(ElytraSyncDispatcher dispatcher) {
         Holder.instance = dispatcher;
-        ElytraSlotConstants.LOGGER.info("[elytraslot] ElytraSyncDispatcher registered: {}", dispatcher.getClass().getName());
+        ElytraSlotConstants.LOGGER.debug("[elytraslot] ElytraSyncDispatcher registered: {}", dispatcher.getClass().getName());
     }
 
     /** Returns the registered dispatcher or null if none registered yet. */

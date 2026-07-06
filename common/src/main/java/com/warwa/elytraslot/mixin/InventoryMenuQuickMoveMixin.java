@@ -74,7 +74,7 @@ public abstract class InventoryMenuQuickMoveMixin extends AbstractContainerMenu 
             // ─── Case 1: Shift-click OUT of the elytra slot ────────────────────────────
             ItemStack beforeMove = sourceSlot.getItem();
             ItemStack preMoveSnapshot = beforeMove.copy();
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] quickMove OUT beforeMove={} player={}",
                 beforeMove, player.getName().getString()
             );
@@ -84,7 +84,7 @@ public abstract class InventoryMenuQuickMoveMixin extends AbstractContainerMenu 
             // — main inventory first, then hotbar, non-reversed.
             boolean moved = this.moveItemStackTo(beforeMove, INV_START, HOTBAR_END_EXCLUSIVE, false);
             if (!moved) {
-                ElytraSlotConstants.LOGGER.info(
+                ElytraSlotConstants.LOGGER.debug(
                     "[elytraslot] quickMove OUT no destination available — return EMPTY"
                 );
                 cir.setReturnValue(ItemStack.EMPTY);
@@ -106,7 +106,7 @@ public abstract class InventoryMenuQuickMoveMixin extends AbstractContainerMenu 
             ElytraEquipEffects.onSlotChanged(player, preMoveSnapshot, sourceSlot.getItem());
 
             cir.setReturnValue(preMoveSnapshot);
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] quickMove OUT SUCCESS pre={} remainingInSource={}",
                 preMoveSnapshot, sourceSlot.getItem()
             );
@@ -124,14 +124,14 @@ public abstract class InventoryMenuQuickMoveMixin extends AbstractContainerMenu 
         // when the slot refuses (rather than attempt an unsuccessful moveItemStackTo that
         // would still let the player shift-click elsewhere).
         if (!elytraSlot.mayPlace(stackInSource)) {
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] quickMove IN elytraSlot.mayPlace=false — falling through to vanilla"
             );
             return;
         }
 
         ItemStack preMoveSnapshot = stackInSource.copy();
-        ElytraSlotConstants.LOGGER.info(
+        ElytraSlotConstants.LOGGER.debug(
             "[elytraslot] quickMove IN beforeMove={} elytraIdx={} srcIdx={}",
             stackInSource, elytraIdx, index
         );
@@ -140,7 +140,7 @@ public abstract class InventoryMenuQuickMoveMixin extends AbstractContainerMenu 
         if (!moved) {
             // Slot refused (e.g. already full). Let vanilla handle the move instead of
             // short-circuiting — the player might still want to move to inventory / hotbar.
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] quickMove IN moveItemStackTo=false — falling through to vanilla"
             );
             return;
@@ -153,7 +153,7 @@ public abstract class InventoryMenuQuickMoveMixin extends AbstractContainerMenu 
         }
         sourceSlot.onTake(player, stackInSource);
         cir.setReturnValue(preMoveSnapshot);
-        ElytraSlotConstants.LOGGER.info(
+        ElytraSlotConstants.LOGGER.debug(
             "[elytraslot] quickMove IN SUCCESS pre={} remainingInSource={}",
             preMoveSnapshot, sourceSlot.getItem()
         );

@@ -39,6 +39,7 @@ public abstract class ElytraSlotMixin {
         if (player.onGround()) return;
         if (player.isPassenger()) return;
         if (player.hasEffect(MobEffects.LEVITATION)) return;
+        if (ElytraSlotUtil.hasExternalElytra(player)) return;
 
         ItemStack elytra = ((IElytraSlotPlayer) player).elytraslot_getElytraStack();
         if (ElytraSlotUtil.isElytraLike(elytra) && LivingEntity.canGlideUsing(elytra, EquipmentSlot.CHEST)) {
@@ -52,6 +53,7 @@ public abstract class ElytraSlotMixin {
         // Only intercept when the custom slot supplies the glider. If the chest has a real
         // elytra, let vanilla run unmodified.
         if (ElytraSlotUtil.isElytraLike(player.getItemBySlot(EquipmentSlot.CHEST))) return;
+        if (ElytraSlotUtil.hasExternalElytra(player)) return;
 
         ItemStack elytra = ((IElytraSlotPlayer) player).elytraslot_getElytraStack();
         if (!ElytraSlotUtil.isElytraLike(elytra)) return;
@@ -98,7 +100,7 @@ public abstract class ElytraSlotMixin {
                     }
 
                     GliderSource pick = Util.getRandom(sources, entity.getRandom());
-                    ElytraSlotConstants.LOGGER.info(
+                    ElytraSlotConstants.LOGGER.debug(
                         "[elytraslot] updateFallFlying damage pick={} sources={} player={}",
                         pick, sources.size(), player.getName().getString()
                     );
@@ -146,7 +148,7 @@ public abstract class ElytraSlotMixin {
                 });
                 // Vanilla's stopLocationBasedEffects also stops enchantment-based effects.
                 EnchantmentHelper.stopLocationBasedEffects(preBreakSnapshot, player, EquipmentSlot.CHEST);
-                ElytraSlotConstants.LOGGER.info("[elytraslot] custom-slot elytra broke item={}", brokenItem);
+                ElytraSlotConstants.LOGGER.debug("[elytraslot] custom-slot elytra broke item={}", brokenItem);
             });
         }
     }

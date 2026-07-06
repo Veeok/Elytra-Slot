@@ -43,7 +43,7 @@ public final class ElytraSlotSyncClient {
             return;
         }
         var container = ((IElytraSlotPlayer) target).elytraslot_getElytraContainer();
-        ElytraSlotConstants.LOGGER.info(
+        ElytraSlotConstants.LOGGER.debug(
             "[elytraslot] SyncClient.handle writing stack={} into player={} containerId={}",
             payload.stack(), target.getName().getString(),
             Integer.toHexString(System.identityHashCode(container))

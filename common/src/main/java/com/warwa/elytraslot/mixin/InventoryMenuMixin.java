@@ -46,7 +46,7 @@ public abstract class InventoryMenuMixin {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 if (!ElytraSlotUtil.isElytraLike(stack)) {
-                    ElytraSlotConstants.LOGGER.info(
+                    ElytraSlotConstants.LOGGER.debug(
                         "[elytraslot] elytraSlot.mayPlace DENY not-elytra-like stack={}", stack
                     );
                     return false;
@@ -54,9 +54,16 @@ public abstract class InventoryMenuMixin {
                 ItemStack chestItem = player.getItemBySlot(EquipmentSlot.CHEST);
                 boolean chestHasElytra = ElytraSlotUtil.isElytraLike(chestItem);
                 if (chestHasElytra) {
-                    ElytraSlotConstants.LOGGER.info(
+                    ElytraSlotConstants.LOGGER.debug(
                         "[elytraslot] elytraSlot.mayPlace DENY vanilla chest already has elytra chestItem={}",
                         chestItem
+                    );
+                    return false;
+                }
+                if (ElytraSlotUtil.hasExternalElytra(player)) {
+                    ElytraSlotConstants.LOGGER.debug(
+                        "[elytraslot] elytraSlot.mayPlace DENY external elytra already equipped player={}",
+                        player.getName().getString()
                     );
                     return false;
                 }
@@ -75,7 +82,7 @@ public abstract class InventoryMenuMixin {
                 if (!inSlot.isEmpty()
                     && !p.isCreative()
                     && EnchantmentHelper.has(inSlot, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)) {
-                    ElytraSlotConstants.LOGGER.info(
+                    ElytraSlotConstants.LOGGER.debug(
                         "[elytraslot] elytraSlot.mayPickup DENY binding-curse player={} stack={}",
                         p.getName().getString(), inSlot
                     );
@@ -89,7 +96,7 @@ public abstract class InventoryMenuMixin {
                 return Identifier.fromNamespaceAndPath("elytraslot", "container/slot/elytra");
             }
         });
-        ElytraSlotConstants.LOGGER.info(
+        ElytraSlotConstants.LOGGER.debug(
             "[elytraslot] elytraSlot added to InventoryMenu at index={} player={}",
             insertedAtIndex, player.getName().getString()
         );

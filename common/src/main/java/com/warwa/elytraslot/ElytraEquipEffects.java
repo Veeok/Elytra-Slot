@@ -57,7 +57,7 @@ public final class ElytraEquipEffects {
         // / loaded). Matches the !firstTick guard in LivingEntity.onEquipItem.
         if (((LivingEntityAccessor) player).elytraslot$isFirstTick()) return;
 
-        ElytraSlotConstants.LOGGER.info(
+        ElytraSlotConstants.LOGGER.debug(
             "[elytraslot] onSlotChanged ENTRY old={} new={} player={} firstTick={} silent={} creative={}",
             oldStack, newStack, player.getName().getString(),
             ((LivingEntityAccessor) player).elytraslot$isFirstTick(),
@@ -67,7 +67,7 @@ public final class ElytraEquipEffects {
         // ─── Step 1: sound + game event (mirror LivingEntity.onEquipItem) ──────────────
         Equippable newEquippable = newStack.get(DataComponents.EQUIPPABLE);
         if (!player.isSilent() && newEquippable != null && newEquippable.slot() == EFFECTIVE_SLOT) {
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] onSlotChanged playing equip sound={}",
                 newEquippable.equipSound()
             );
@@ -80,7 +80,7 @@ public final class ElytraEquipEffects {
                 player.getRandom().nextLong()
             );
         } else {
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] onSlotChanged equip-sound skipped silent={} equippable-null={} slot-mismatch={}",
                 player.isSilent(),
                 newEquippable == null,
@@ -90,7 +90,7 @@ public final class ElytraEquipEffects {
         // doesEmitEquipEvent(slot) returns true for CHEST in vanilla LivingEntity.
         // GameEvent.EQUIP / UNEQUIP are Holder<GameEvent> in 26.1; gameEvent() takes Holder.
         Holder<GameEvent> gameEvent = newEquippable != null ? GameEvent.EQUIP : GameEvent.UNEQUIP;
-        ElytraSlotConstants.LOGGER.info("[elytraslot] onSlotChanged gameEvent={}", gameEvent);
+        ElytraSlotConstants.LOGGER.debug("[elytraslot] onSlotChanged gameEvent={}", gameEvent);
         player.gameEvent(gameEvent);
 
         // ─── Step 2: stop OLD stack's attribute modifiers + location-based effects ─────
@@ -106,18 +106,18 @@ public final class ElytraEquipEffects {
                     removedCount[0]++;
                 }
             });
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] onSlotChanged stopped OLD modifiers count={} stack={}",
                 removedCount[0], oldStack
             );
             if (player.level() instanceof ServerLevel sl) {
-                ElytraSlotConstants.LOGGER.info(
+                ElytraSlotConstants.LOGGER.debug(
                     "[elytraslot] onSlotChanged stopLocationBasedEffects OLD stack={}", oldStack
                 );
                 EnchantmentHelper.stopLocationBasedEffects(oldStack, player, EFFECTIVE_SLOT);
             }
         } else {
-            ElytraSlotConstants.LOGGER.info("[elytraslot] onSlotChanged OLD stack empty — skipped stop phase");
+            ElytraSlotConstants.LOGGER.debug("[elytraslot] onSlotChanged OLD stack empty — skipped stop phase");
         }
 
         // ─── Step 3: apply NEW stack's attribute modifiers + run location-based effects ─
@@ -132,18 +132,18 @@ public final class ElytraEquipEffects {
                     appliedCount[0]++;
                 }
             });
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] onSlotChanged applied NEW modifiers count={} stack={}",
                 appliedCount[0], newStack
             );
             if (player.level() instanceof ServerLevel sl) {
-                ElytraSlotConstants.LOGGER.info(
+                ElytraSlotConstants.LOGGER.debug(
                     "[elytraslot] onSlotChanged runLocationChangedEffects NEW stack={}", newStack
                 );
                 EnchantmentHelper.runLocationChangedEffects(sl, newStack, player, EFFECTIVE_SLOT);
             }
         } else {
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] onSlotChanged NEW stack empty/broken — skipped apply phase empty={} broken={}",
                 newStack.isEmpty(), newStack.isBroken()
             );
@@ -151,7 +151,7 @@ public final class ElytraEquipEffects {
 
         // ─── Step 4: advancement trigger (C2 fix) ──────────────────────────────────────
         if (player instanceof ServerPlayer sp) {
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] onSlotChanged firing CriteriaTriggers.INVENTORY_CHANGED for {}",
                 sp.getName().getString()
             );
@@ -165,7 +165,7 @@ public final class ElytraEquipEffects {
         // a WARN is logged so we notice.
         ElytraSyncDispatcher dispatcher = ElytraSyncDispatcher.get();
         if (dispatcher != null) {
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] onSlotChanged broadcasting sync payload to trackers of {}",
                 player.getName().getString()
             );
@@ -176,6 +176,6 @@ public final class ElytraEquipEffects {
             );
         }
 
-        ElytraSlotConstants.LOGGER.info("[elytraslot] onSlotChanged EXIT");
+        ElytraSlotConstants.LOGGER.debug("[elytraslot] onSlotChanged EXIT");
     }
 }

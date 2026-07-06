@@ -32,7 +32,7 @@ public class ServerPlayerCloneMixin {
     private void elytraslot$carryOver(ServerPlayer oldPlayer, boolean restoreAll, CallbackInfo ci) {
         boolean keepInventory = this.elytraslot$shouldCarry(oldPlayer, restoreAll);
         if (!keepInventory) {
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] restoreFrom skipping carry (restoreAll={}, spec={}, keepInv={}, player={})",
                 restoreAll,
                 oldPlayer.isSpectator(),
@@ -43,7 +43,7 @@ public class ServerPlayerCloneMixin {
         }
         ItemStack oldStack = ((IElytraSlotPlayer) oldPlayer).elytraslot_getElytraStack();
         if (!oldStack.isEmpty()) {
-            ElytraSlotConstants.LOGGER.info(
+            ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] restoreFrom carrying stack={} player={}",
                 oldStack, oldPlayer.getName().getString()
             );
