@@ -7,12 +7,12 @@
     "trinkets:default"
   ],
   "quick_move_predicates": [
-    "trinkets:relevant"
+    "trinkets:default"
   ],
   "tooltip_predicates": [
-    "trinkets:relevant"
+    "trinkets:default"
   ],
   "interact_equipable_predicates": [
-    "trinkets:relevant"
+    "trinkets:default"
   ]
 }
