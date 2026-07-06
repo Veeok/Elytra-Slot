@@ -24,8 +24,5 @@
         "fabricloader": ">=0.18.0",
         "minecraft": ">=26.1",
         "fabric-api": "*"
-    },
-    "suggests": {
-        "trinkets_updated": "*"
     }
 }
