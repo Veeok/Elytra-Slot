@@ -33,7 +33,6 @@ public abstract class InventoryMenuQuickMoveMixin extends AbstractContainerMenu 
 
         int elytraIdx = findElytraSlotIndex(menu, player);
         if (elytraIdx < 0) {
-            if (ElytraSlotUtil.usesTrinketsSlot(player)) return;
             ElytraSlotConstants.LOGGER.warn(
                 "[elytraslot] quickMove custom slot not found for player={} — falling through to vanilla",
                 player.getName().getString()
