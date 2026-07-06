@@ -19,6 +19,7 @@ import net.minecraft.world.item.equipment.Equippable;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -29,9 +30,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * vanilla {@link WingsLayer#submit} exactly:
  * <ul>
  *   <li>Z-translation of {@code 0.125F} (same as vanilla).</li>
- *   <li>Player skin / cape texture looked up via an inlined copy of vanilla's private
- *       {@code getPlayerElytraTexture(state)} helper — so custom capes render on the
- *       custom-slot elytra just like a chest-slot elytra.</li>
+ *   <li>Player skin / cape texture looked up via a uniquely named inlined copy of
+ *       vanilla's private helper — so other mods can still target vanilla's original
+ *       {@code getPlayerElytraTexture(state)} method.</li>
  *   <li>Tint color passed as {@code 0} (vanilla literal) — vanilla does not apply
  *       {@code DYED_COLOR} tint to elytras.</li>
  * </ul>
@@ -65,7 +66,7 @@ public class ElytraLayerMixin<S extends HumanoidRenderState, M extends EntityMod
         if (equippable == null || equippable.assetId().isEmpty()) return;
 
         // Mirror vanilla WingsLayer.submit exactly.
-        Identifier playerElytraTexture = getPlayerElytraTexture(renderState);
+        Identifier playerElytraTexture = elytraslot$getPlayerElytraTexture(renderState);
         ElytraModel model = renderState.isBaby ? this.elytraBabyModel : this.elytraModel;
         poseStack.pushPose();
         poseStack.translate(0.0F, 0.0F, 0.125F);
@@ -86,11 +87,12 @@ public class ElytraLayerMixin<S extends HumanoidRenderState, M extends EntityMod
     }
 
     /**
-     * Inlined copy of vanilla {@code WingsLayer.getPlayerElytraTexture} (package-private
-     * there). Returns the player's skin-defined elytra texture if present, otherwise the
-     * cape texture if the cape is shown, otherwise null.
+     * Inlined copy of vanilla {@code WingsLayer.getPlayerElytraTexture}. Kept @Unique
+     * and prefixed so it cannot merge over vanilla's private helper and break other
+     * mixins such as FrozenLib's cape-as-elytra hook.
      */
-    private static @Nullable Identifier getPlayerElytraTexture(HumanoidRenderState state) {
+    @Unique
+    private static @Nullable Identifier elytraslot$getPlayerElytraTexture(HumanoidRenderState state) {
         if (state instanceof AvatarRenderState playerState) {
             PlayerSkin skin = playerState.skin;
             if (skin.elytra() != null) {
