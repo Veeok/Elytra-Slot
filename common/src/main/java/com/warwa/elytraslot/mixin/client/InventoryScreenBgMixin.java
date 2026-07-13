@@ -1,11 +1,13 @@
 package com.warwa.elytraslot.mixin.client;
 
+import com.warwa.elytraslot.ElytraSlotContainer;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -29,7 +31,7 @@ public abstract class InventoryScreenBgMixin extends AbstractContainerScreen<Inv
 
     @Override
     protected boolean hasClickedOutside(double mx, double my, int xo, int yo) {
-        if (mx >= xo - 33 && mx < xo && my >= yo && my < yo + 32) {
+        if (elytraslot$hasStandaloneSlot() && mx >= xo - 33 && mx < xo && my >= yo && my < yo + 32) {
             return false;
         }
         return super.hasClickedOutside(mx, my, xo, yo);
@@ -37,6 +39,8 @@ public abstract class InventoryScreenBgMixin extends AbstractContainerScreen<Inv
 
     @Inject(method = "extractBackground", at = @At("TAIL"))
     private void elytraslot(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
+        if (!elytraslot$hasStandaloneSlot()) return;
+
         int x = this.leftPos;
         int y = this.topPos;
 
@@ -74,5 +78,12 @@ public abstract class InventoryScreenBgMixin extends AbstractContainerScreen<Inv
 
     private static void blit(GuiGraphicsExtractor g, int x, int y, int u, int v, int w, int h) {
         g.blit(RenderPipelines.GUI_TEXTURED, INVENTORY_TEXTURE, x, y, (float) u, (float) v, w, h, 256, 256);
+    }
+
+    private boolean elytraslot$hasStandaloneSlot() {
+        for (Slot slot : this.menu.slots) {
+            if (slot.container instanceof ElytraSlotContainer) return true;
+        }
+        return false;
     }
 }

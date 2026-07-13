@@ -41,14 +41,16 @@ public class ServerPlayerCloneMixin {
             );
             return;
         }
-        ItemStack oldStack = ((IElytraSlotPlayer) oldPlayer).elytraslot_getElytraStack();
+        // Trinkets carries its own dedicated slot across clones. This only preserves the
+        // standalone fallback container when Trinkets is absent or its slot is unavailable.
+        ItemStack oldStack = ((IElytraSlotPlayer) oldPlayer).elytraslot_getElytraContainer().getItem(0);
         if (!oldStack.isEmpty()) {
             ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] restoreFrom carrying stack={} player={}",
                 oldStack, oldPlayer.getName().getString()
             );
             // Silent — respawn carry-over is not an equip interaction; no sound / game event.
-            ((IElytraSlotPlayer) (Object) this).elytraslot_setElytraStackSilent(oldStack.copy());
+            ((IElytraSlotPlayer) (Object) this).elytraslot_getElytraContainer().setItemSilent(0, oldStack.copy());
         }
     }
 

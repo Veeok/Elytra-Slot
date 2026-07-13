@@ -21,13 +21,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Adds the standalone Elytra Slot to the player's {@link InventoryMenu}.
  * The slot is appended to the end of the menu's slot list.
  */
-@Mixin(InventoryMenu.class)
+@Mixin(value = InventoryMenu.class, priority = 500)
 public abstract class InventoryMenuMixin {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void elytraslot$addElytraSlot(Inventory inventory, boolean active, Player player, CallbackInfo ci) {
         InventoryMenu menu = (InventoryMenu) (Object) this;
         var container = ((IElytraSlotPlayer) player).elytraslot_getElytraContainer();
+        // The attachment may not be populated yet while this menu is constructed. The
+        // installed Trinkets API is the stable condition that chooses the dedicated slot.
+        if (ElytraSlotUtil.isTrinketsAvailable()) {
+            ElytraSlotConstants.LOGGER.debug(
+                "[elytraslot] Trinkets available; standalone inventory slot skipped player={}",
+                player.getName().getString()
+            );
+            return;
+        }
 
         int insertedAtIndex = menu.slots.size();
         menu.addSlot(new Slot(container, 0, -25, 8) {

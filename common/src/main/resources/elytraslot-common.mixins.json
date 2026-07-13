@@ -18,6 +18,7 @@
         "client.HumanoidRenderStateMixin",
         "client.HumanoidRenderStateAccessorMixin",
         "client.InventoryScreenBgMixin",
+        "client.ElytraSlotHoverMixin",
         "client.CreativeInventoryScreenMixin",
         "client.CapeLayerMixin"
     ],

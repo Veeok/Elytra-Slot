@@ -35,6 +35,8 @@ public class HumanoidRenderStateMixin {
         if (!(state instanceof IElytraHolder holder)) return;
 
         holder.elytraslot_setAccessoriesElytra(ItemStack.EMPTY);
+        // Trinkets renders and synchronizes its dedicated chest/elytra slot itself.
+        if (ElytraSlotUtil.isTrinketsAvailable()) return;
 
         if (ElytraSlotUtil.hasExternalElytra(player)) return;
 

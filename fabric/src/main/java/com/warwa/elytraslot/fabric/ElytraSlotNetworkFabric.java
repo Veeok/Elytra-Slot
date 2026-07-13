@@ -3,6 +3,9 @@ package com.warwa.elytraslot.fabric;
 import com.warwa.elytraslot.ElytraSlotConstants;
 import com.warwa.elytraslot.ElytraSlotSyncPayload;
 import com.warwa.elytraslot.ElytraSyncDispatcher;
+import com.warwa.elytraslot.IElytraSlotPlayer;
+import com.warwa.elytraslot.ElytraSlotUtil;
+import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -39,6 +42,8 @@ public final class ElytraSlotNetworkFabric {
             ElytraSlotSyncPayload.TYPE.id());
 
         ElytraSyncDispatcher.register((Player player, ItemStack newStack) -> {
+            // Trinkets synchronizes its own dedicated chest/elytra inventory.
+            if (ElytraSlotUtil.usesDedicatedTrinketsSlot(player)) return;
             if (player.level().isClientSide()) {
                 ElytraSlotConstants.LOGGER.warn(
                     "[elytraslot] FabricDispatcher.broadcastSlotChange called client-side — skipping");
@@ -57,6 +62,20 @@ public final class ElytraSlotNetworkFabric {
             ElytraSlotConstants.LOGGER.debug(
                 "[elytraslot] FabricDispatcher.broadcastSlotChange player={} stack={} sent={}",
                 player.getName().getString(), newStack, sent
+            );
+        });
+
+        // Equipment changes only reach clients already tracking the player. Send a snapshot
+        // when tracking starts so a pre-equipped elytra renders without being toggled first.
+        EntityTrackingEvents.START_TRACKING.register((entity, tracker) -> {
+            if (!(entity instanceof Player player)) return;
+            if (ElytraSlotUtil.usesDedicatedTrinketsSlot(player)) return;
+
+            ItemStack stack = ((IElytraSlotPlayer) player).elytraslot_getElytraStack().copy();
+            ServerPlayNetworking.send(tracker, new ElytraSlotSyncPayload(player.getUUID(), stack));
+            ElytraSlotConstants.LOGGER.info(
+                "[elytraslot] initial sync tracked={} tracker={} stack={}",
+                player.getName().getString(), tracker.getName().getString(), stack
             );
         });
 

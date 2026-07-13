@@ -1,6 +1,5 @@
 package com.warwa.elytraslot.mixin;
 
-import com.warwa.elytraslot.ElytraEquipEffects;
 import com.warwa.elytraslot.ElytraSlotConstants;
 import com.warwa.elytraslot.ElytraSlotUtil;
 import com.warwa.elytraslot.IElytraSlotPlayer;
@@ -59,6 +58,15 @@ public abstract class ElytraEquipMixin {
         }
 
         IElytraSlotPlayer slotPlayer = (IElytraSlotPlayer) player;
+        boolean dedicatedTrinketsSlot = ElytraSlotUtil.usesDedicatedTrinketsSlot(player);
+        if (ElytraSlotUtil.isTrinketsAvailable() && !dedicatedTrinketsSlot) {
+            ElytraSlotConstants.LOGGER.warn(
+                "[elytraslot] dedicated Trinkets slot unavailable; blocked right-click route to avoid another slot player={}",
+                player.getName().getString()
+            );
+            cir.setReturnValue(InteractionResult.FAIL);
+            return;
+        }
         ItemStack inEquipmentSlot = slotPlayer.elytraslot_getElytraStack();
 
         if (EnchantmentHelper.has(inEquipmentSlot, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)
@@ -72,28 +80,24 @@ public abstract class ElytraEquipMixin {
         }
 
         ElytraSlotConstants.LOGGER.debug(
-            "[elytraslot] swapWithEquipmentSlot inHand={} existing={} count={} creative={}",
-            inHand, inEquipmentSlot, inHand.getCount(), player.isCreative()
+            "[elytraslot] swapWithEquipmentSlot inHand={} existing={} count={} creative={} dedicatedTrinkets={}",
+            inHand, inEquipmentSlot, inHand.getCount(), player.isCreative(), dedicatedTrinketsSlot
         );
 
         if (!player.level().isClientSide()) {
             player.awardStat(Stats.ITEM_USED.get(inHand.getItem()));
         }
 
-        ItemStack oldForEffects = inEquipmentSlot.copy();
-
         InteractionResult result;
         if (inHand.getCount() <= 1) {
             ItemStack swappedToHand = inEquipmentSlot.isEmpty() ? inHand : inEquipmentSlot.copyAndClear();
             ItemStack swappedToEquipment = player.isCreative() ? inHand.copy() : inHand.copyAndClear();
             slotPlayer.elytraslot_setElytraStack(swappedToEquipment);
-            ElytraEquipEffects.onSlotChanged(player, oldForEffects, swappedToEquipment);
             result = InteractionResult.SUCCESS.heldItemTransformedTo(swappedToHand);
         } else {
             ItemStack swappedToInventory = inEquipmentSlot.copyAndClear();
             ItemStack swappedToEquipment = inHand.consumeAndReturn(1, player);
             slotPlayer.elytraslot_setElytraStack(swappedToEquipment);
-            ElytraEquipEffects.onSlotChanged(player, oldForEffects, swappedToEquipment);
             if (!swappedToInventory.isEmpty() && !player.getInventory().add(swappedToInventory)) {
                 player.drop(swappedToInventory, false);
             }

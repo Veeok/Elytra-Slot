@@ -4,6 +4,21 @@ All dates in local time. Format: chronological, most recent on top.
 
 ---
 
+## 2026-07-13 — v2.0.1: Trinkets dedicated-slot fixes
+
+### Fixed
+
+- The standalone Elytra Slot no longer appears alongside Trinkets when Trinkets is installed.
+- Right-clicking an elytra now places it directly in the dedicated Trinkets `chest/elytra` slot instead of a generic Charm slot.
+- If Trinkets has not yet initialized the dedicated slot, elytra right-click is blocked rather than equipping into an incorrect Trinkets slot.
+- Existing standalone-slot elytras still migrate into the dedicated Trinkets slot when the player joins.
+
+### Verification
+
+- `./gradlew.bat :fabric:build` passed.
+
+---
+
 ## 2026-07-07 — v2.0.0 PR update: Trinkets priority integration
 
 Compatibility update for Trinkets Updated. Trinkets remains optional. Elytra Slot still works normally without Trinkets installed.

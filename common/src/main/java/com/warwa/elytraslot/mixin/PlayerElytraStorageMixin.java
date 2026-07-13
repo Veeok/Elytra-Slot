@@ -2,6 +2,7 @@ package com.warwa.elytraslot.mixin;
 
 import com.warwa.elytraslot.ElytraSlotConstants;
 import com.warwa.elytraslot.ElytraSlotContainer;
+import com.warwa.elytraslot.ElytraSlotUtil;
 import com.warwa.elytraslot.IElytraSlotPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
@@ -64,6 +65,7 @@ public class PlayerElytraStorageMixin implements IElytraSlotPlayer {
                 "[elytraslot] loadData restored stack={}", stack
             );
         });
+        ElytraSlotUtil.migrateLegacyElytra((Player) (Object) this, this.elytraslot_container);
     }
 
     @Inject(method = "dropEquipment", at = @At("TAIL"))

@@ -2,6 +2,7 @@ package com.warwa.elytraslot.mixin.client;
 
 import com.warwa.elytraslot.ElytraSlotConstants;
 import com.warwa.elytraslot.ElytraSlotContainer;
+import com.warwa.elytraslot.ElytraSlotUtil;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
@@ -57,6 +58,7 @@ public abstract class CreativeInventoryScreenMixin
             }
         }
         if (ourSlot == null) {
+            if (ElytraSlotUtil.isTrinketsAvailable()) return;
             ElytraSlotConstants.LOGGER.warn(
                 "[elytraslot] selectTab(INVENTORY): no ElytraSlotContainer found in player.inventoryMenu — skipping"
             );

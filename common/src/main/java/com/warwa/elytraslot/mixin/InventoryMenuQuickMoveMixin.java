@@ -25,6 +25,10 @@ public abstract class InventoryMenuQuickMoveMixin extends AbstractContainerMenu 
 
     @Inject(method = "quickMoveStack", at = @At("HEAD"), cancellable = true)
     private void elytraslot$quickMove(Player player, int index, CallbackInfoReturnable<ItemStack> cir) {
+        // Trinkets owns routing whenever it is installed, including before its attachment
+        // finishes loading for a newly opened player menu.
+        if (ElytraSlotUtil.isTrinketsAvailable()) return;
+
         InventoryMenu menu = (InventoryMenu) (Object) this;
         if (index < 0 || index >= menu.slots.size()) return;
 

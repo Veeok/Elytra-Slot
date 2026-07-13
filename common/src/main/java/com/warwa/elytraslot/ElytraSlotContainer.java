@@ -32,8 +32,42 @@ public class ElytraSlotContainer extends SimpleContainer {
     public void setItem(int index, ItemStack stack) {
         ItemStack old = this.getItem(index).copy();
         super.setItem(index, stack);
+        this.elytraslot$notifyChanged(old, this.getItem(index));
+    }
+
+    @Override
+    public ItemStack removeItem(int index, int count) {
+        ItemStack old = this.getItem(index).copy();
+        ItemStack removed = super.removeItem(index, count);
+        this.elytraslot$notifyChanged(old, this.getItem(index));
+        return removed;
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int index) {
+        ItemStack old = this.getItem(index).copy();
+        ItemStack removed = super.removeItemNoUpdate(index);
+        this.elytraslot$notifyChanged(old, this.getItem(index));
+        return removed;
+    }
+
+    @Override
+    public void clearContent() {
+        ItemStack old = this.getItem(0).copy();
+        super.clearContent();
+        this.elytraslot$notifyChanged(old, this.getItem(0));
+    }
+
+    private void elytraslot$notifyChanged(ItemStack oldStack, ItemStack newStack) {
         if (!silent && owner != null) {
-            ElytraEquipEffects.onSlotChanged(owner, old, stack);
+            ElytraSlotConstants.LOGGER.info(
+                "[elytraslot] container change side={} owner={} old={} new={}",
+                owner.level().isClientSide() ? "client" : "server",
+                owner.getName().getString(),
+                oldStack,
+                newStack
+            );
+            ElytraEquipEffects.onSlotChanged(owner, oldStack, newStack);
         }
     }
 

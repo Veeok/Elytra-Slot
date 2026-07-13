@@ -1,0 +1,15 @@
+{
+  "amount": 1,
+  "max_stack_size": 1,
+  "icon": "elytraslot:container/slot/elytra",
+  "order": -768,
+  "validator_predicates": [
+    "elytraslot:elytra"
+  ],
+  "quick_move_predicates": [
+    "elytraslot:elytra"
+  ],
+  "interact_equipable_predicates": [
+    "elytraslot:elytra"
+  ]
+}
