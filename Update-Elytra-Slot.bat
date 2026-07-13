@@ -3,9 +3,9 @@ setlocal EnableExtensions DisableDelayedExpansion
 
 rem Put this file in the Minecraft instance's mods folder, close Minecraft, then run it.
 rem You may instead drag the mods folder onto this file.
-set "JAR_NAME=elytraslot-fabric-26.1.2-2.0.1.jar"
-set "JAR_URL=https://github.com/Veeok/Elytra-Slot/releases/download/v2.0.1/elytraslot-fabric-26.1.2-2.0.1.jar"
-set "EXPECTED_SHA256=3B07C214F9E0CF3AAD02E657BB2CBFC2C37274AF982C3968B79380A3CEC3E5EA"
+set "JAR_NAME=elytraslot-fabric-26.1.2-2.0.2.jar"
+set "JAR_URL=https://github.com/Veeok/Elytra-Slot/releases/download/v2.0.2/elytraslot-fabric-26.1.2-2.0.2.jar"
+set "EXPECTED_SHA256=F67329C42381898497F3DA98D811638962895ACE8B05B8899E5881724A0131FB"
 set "SCRIPT_DIR=%~dp0"
 set "MODS_DIR=%SCRIPT_DIR%"
 
@@ -23,7 +23,7 @@ echo.
 echo Updating Elytra Slot in:
 echo %MODS_DIR%
 echo.
-echo Downloading version 2.0.1...
+echo Downloading version 2.0.2...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference = 'Stop'; Invoke-WebRequest -Uri $env:ELYTRASLOT_URL -OutFile $env:ELYTRASLOT_TEMP"
 if errorlevel 1 goto :download_failed
 
@@ -45,7 +45,7 @@ move /Y "%TEMP_JAR%" "%NEW_JAR%" >nul
 if errorlevel 1 goto :install_failed
 
 echo.
-echo Elytra Slot 2.0.1 is installed successfully.
+echo Elytra Slot 2.0.2 is installed successfully.
 echo Start Minecraft after the server has also been updated.
 pause
 exit /b 0
@@ -72,13 +72,21 @@ exit /b 1
 
 :backup_failed
 del /q "%TEMP_JAR%" >nul 2>&1
+call :restore_backups
 echo.
 echo Could not replace the existing jar. Close Minecraft and the server, then try again.
 pause
 exit /b 1
 
 :install_failed
+call :restore_backups
 echo.
-echo Could not install the new jar. Your previous jar backups were kept.
+echo Could not install the new jar. The previous jar was restored.
 pause
 exit /b 1
+
+:restore_backups
+for %%F in ("%MODS_DIR%\elytraslot-fabric-*.jar.bak-%STAMP%") do (
+    if exist "%%~fF" move /Y "%%~fF" "%%~dpnF" >nul
+)
+exit /b 0

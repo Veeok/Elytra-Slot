@@ -11,7 +11,8 @@ import java.util.Collection;
 import java.util.function.Predicate;
 
 public class ElytraSlotUtil {
-    private static final String DEDICATED_TRINKETS_SLOT = "chest/elytra/0";
+    // Trinkets serializes slot index zero with "@0", not the getSlotAccess path syntax.
+    private static final String DEDICATED_TRINKETS_SLOT = "chest/elytra@0";
     private static final Method TRINKETS_GET_ATTACHMENT = findTrinketsGetAttachment();
     private static final Method TRINKETS_GET_SLOT_ACCESS = findTrinketsGetSlotAccess();
     private static final Method TRINKETS_EQUIPPED = findTrinketsEquipped();

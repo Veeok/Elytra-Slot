@@ -4,6 +4,20 @@ All dates in local time. Format: chronological, most recent on top.
 
 ---
 
+## 2026-07-13 — v2.0.2: Trinkets exclusivity correction
+
+### Fixed
+
+- Corrected the dedicated Trinkets slot identifier used by the external-elytra guard. Right-clicking a second elytra can no longer bypass the dedicated slot and equip it in the vanilla chest slot.
+- The Windows updater now restores renamed Elytra Slot jars if it cannot complete the final installation step.
+
+### Verification
+
+- `./gradlew.bat :fabric:build` passed.
+- Updater rollback was tested with a locked jar in an isolated mods folder.
+
+---
+
 ## 2026-07-13 — v2.0.1: Trinkets dedicated-slot fixes
 
 ### Fixed
